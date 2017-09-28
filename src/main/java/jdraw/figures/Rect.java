@@ -9,9 +9,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import jdraw.framework.Figure;
+import jdraw.framework.FigureEvent;
 import jdraw.framework.FigureHandle;
 import jdraw.framework.FigureListener;
 
@@ -22,6 +25,9 @@ import jdraw.framework.FigureListener;
  *
  */
 public class Rect implements Figure {
+	private List<FigureListener> myObservers = new CopyOnWriteArrayList<>(); // use COWAL in order to avoid problems with observer removal while sending notifications
+	private static boolean myObserversAreBeingNotified = false; // in order to avoid notification cycles
+
 	/**
 	 * Use the java.awt.Rectangle in order to save/reuse code.
 	 */
@@ -53,13 +59,20 @@ public class Rect implements Figure {
 	@Override
 	public void setBounds(Point origin, Point corner) {
 		rectangle.setFrameFromDiagonal(origin, corner);
-		// TODO notification of change
 	}
 
 	@Override
 	public void move(int dx, int dy) {
-		rectangle.setLocation(rectangle.x + dx, rectangle.y + dy);
-		// TODO notification of change
+		if(dx == rectangle.getX() && dy == rectangle.getY()){
+			// same position, no changes needed
+		} else {
+			rectangle.setLocation(rectangle.x + dx, rectangle.y + dy);
+			if(!myObserversAreBeingNotified){
+				myObserversAreBeingNotified = true;
+				myObservers.forEach(figureListener -> figureListener.figureChanged(new FigureEvent(this)));
+			}
+			myObserversAreBeingNotified = false;
+		}
 	}
 
 	@Override
@@ -84,12 +97,17 @@ public class Rect implements Figure {
 
 	@Override
 	public void addFigureListener(FigureListener listener) {
-		// TODO Auto-generated method stub
+		if(listener == null){return;}
+		if(!myObservers.contains(listener)){
+			myObservers.add(listener);
+		}
 	}
 
 	@Override
 	public void removeFigureListener(FigureListener listener) {
-		// TODO Auto-generated method stub
+		if(listener != null){
+			myObservers.remove(listener);
+		}
 	}
 
 	@Override
