@@ -54,6 +54,7 @@ public class Rect implements Figure {
 		g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 		g.setColor(Color.BLACK);
 		g.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+		myObservers.forEach(figureListener -> figureListener.figureChanged(new FigureEvent(this)));
 	}
 	
 	@Override
