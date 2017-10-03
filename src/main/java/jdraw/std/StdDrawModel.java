@@ -104,14 +104,6 @@ public class StdDrawModel implements DrawModel, FigureListener {
 
 	@Override
 	public void figureChanged(FigureEvent e) {
-		if(e != null && e.getFigure() != null){
-			for(int i = 0; i < listOfFigures.size(); i++){
-				if(listOfFigures.get(i).equals(e.getFigure())){
-					listOfFigures.set(i, e.getFigure());
-					i = Integer.MAX_VALUE-1;
-				}
-			}
-			listOfObservers.forEach(drawModelListener -> drawModelListener.modelChanged(new DrawModelEvent(this, null, DrawModelEvent.Type.DRAWING_CLEARED)));
-		}
+		listOfObservers.forEach(drawModelListener -> drawModelListener.modelChanged(new DrawModelEvent(this, e.getFigure(), DrawModelEvent.Type.FIGURE_CHANGED)));
 	}
 }
