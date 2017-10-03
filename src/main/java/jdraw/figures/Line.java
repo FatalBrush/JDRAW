@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2017 Fachhochschule Nordwestschweiz (FHNW)
- * All Rights Reserved. 
- */
-
 package jdraw.figures;
 
 import jdraw.framework.Figure;
@@ -16,54 +11,48 @@ import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Represents rectangles in JDraw.
- * 
- * @author Sebastian Zimmermann
- *
- */
+
 public class Line implements Figure {
 	private List<FigureListener> myObservers = new CopyOnWriteArrayList<>(); // use COWAL in order to avoid problems with observer removal while sending notifications
 	private static boolean myObserversAreBeingNotified = false; // in order to avoid notification cycles
 
-	/**
-	 * Use the java.awt.Rectangle in order to save/reuse code.
-	 */
-	private Line2D line2D;
+	private static final int INTER_SIZE = 4;
 
-	/**
-	 * Create a new rectangle of the given dimension.
-	 * @param x the x-coordinate of the upper left corner of the rectangle
-	 * @param y the y-coordinate of the upper left corner of the rectangle
-	 * @param w the rectangle's width
-	 * @param h the rectangle's height
-	 */
+	private Point originPoint = null;
+	private Point endPoint = null;
+
+
 	public Line(int x, int y, int w, int h) {
-		line2D = new Line2D.Double(new Point2D.Double(x, y), new Point2D.Double(w, h));
+		originPoint = new Point(x, y);
+		endPoint = new Point(w, h);
 	}
 
-	/**
-	 * Draw the rectangle to the given graphics context.
-	 * @param g the graphics context to use for drawing.
-	 */
 	@Override
 	public void draw(Graphics g) {
 		g.setColor(Color.BLACK);
-		g.drawLine((int)line2D.getX1(), (int)line2D.getY1(), (int)line2D.getX2(), (int)line2D.getY2());
+		g.drawLine(originPoint.x, originPoint.y, endPoint.x, endPoint.y);
 		myObservers.forEach(figureListener -> figureListener.figureChanged(new FigureEvent(this)));
 	}
 
 	@Override
 	public void setBounds(Point origin, Point corner) {
-		line2D.setLine(origin, corner);
+		Line original = new Line(origin.x, origin.y, corner.x, corner.y);
+		originPoint = origin;
+		endPoint = corner;
+		if(!original.equals(this)){
+			// TODO: maybe figure changed event?
+		}
 	}
 
 	@Override
 	public void move(int dx, int dy) {
-		if(dx == line2D.getX1() && dy == line2D.getY1()){ // TODO: check starting and end point
+		if(dx == originPoint.x && dy == originPoint.y){ // TODO: check starting and end point
 			// same position, no changes needed
 		} else {
-			line2D.setLine(line2D.getX1()+dx, line2D.getY1()+dy, line2D.getX2(), line2D.getY2()); // TODO: work with individual points
+			Point newOriginPoint = new Point(originPoint.x + dx, originPoint.y + dy);
+			Point newEndPoint = new Point(endPoint.x + dx, endPoint.y + dy);
+			originPoint = newOriginPoint;
+			endPoint = newEndPoint;
 			if(!myObserversAreBeingNotified){
 				myObserversAreBeingNotified = true;
 				myObservers.forEach(figureListener -> figureListener.figureChanged(new FigureEvent(this)));
@@ -74,19 +63,56 @@ public class Line implements Figure {
 
 	@Override
 	public boolean contains(int x, int y) {
-		return line2D.contains(new Point2D.Double(x,y));
+		Line2D tmpLine = new Line2D.Double(originPoint, endPoint);
+		return tmpLine.intersects(x - INTER_SIZE/2, y - INTER_SIZE/2, INTER_SIZE, INTER_SIZE);
 	}
 
 	@Override
 	public Rectangle getBounds() {
-		return line2D.getBounds();
+		int width = originPoint.x - endPoint.x;
+		if(width < 0){
+			width = width * -1;
+		}
+		int height = originPoint.y - endPoint.y;
+		if(height < 0){
+			height = height * -1;
+		}
+
+		if(originPoint.x < endPoint.x && originPoint.y < endPoint.y){
+			return new Rectangle(originPoint.x, originPoint.y, width, height);
+		}
+
+		if(originPoint.x < endPoint.x && originPoint.y > endPoint.y){
+			return new Rectangle(originPoint.x, endPoint.y, width, height);
+		}
+
+		if(originPoint.x > endPoint.x && originPoint.y < endPoint.y){
+			return new Rectangle(endPoint.x, originPoint.y, width, height);
+		}
+
+		if(originPoint.x > endPoint.x && originPoint.y > endPoint.y){
+			return new Rectangle(endPoint.x, endPoint.y, width, height);
+		}
+
+		if(originPoint.x > endPoint.x && originPoint.y == endPoint.y){
+			return new Rectangle(endPoint.x, endPoint.y, width, height);
+		}
+
+		if(originPoint.x < endPoint.x && originPoint.y == endPoint.y){
+			return new Rectangle(originPoint.x, originPoint.y, width, height);
+		}
+
+		if(originPoint.x == endPoint.y && originPoint.y > endPoint.y){
+			return new Rectangle(endPoint.x, endPoint.y, width, height);
+		}
+
+		if(originPoint.x == endPoint.y && originPoint.y < endPoint.y){
+			return new Rectangle(originPoint.x, originPoint.y, width, height);
+		}
+
+		return null;
 	}
 
-	/**
-	 * Returns a list of 8 handles for this Rectangle.
-	 * @return all handles that are attached to the targeted figure.
-	 * @see Figure#getHandles()
-	 */	
 	@Override
 	public List<FigureHandle> getHandles() {
 		return null;
