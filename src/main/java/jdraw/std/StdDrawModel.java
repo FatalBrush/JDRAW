@@ -6,6 +6,7 @@
 package jdraw.std;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import jdraw.framework.*;
@@ -103,6 +104,6 @@ public class StdDrawModel implements DrawModel, FigureListener {
 
 	@Override
 	public void figureChanged(FigureEvent e) {
-		// TODO:
+		listOfObservers.forEach(drawModelListener -> drawModelListener.modelChanged(new DrawModelEvent(this, e.getFigure(), DrawModelEvent.Type.FIGURE_CHANGED)));
 	}
 }
