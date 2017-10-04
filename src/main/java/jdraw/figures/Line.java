@@ -1,26 +1,14 @@
 package jdraw.figures;
 
-import jdraw.framework.Figure;
 import jdraw.framework.FigureEvent;
-import jdraw.framework.FigureHandle;
-import jdraw.framework.FigureListener;
-
 import java.awt.*;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class Line implements Figure {
-	private List<FigureListener> myObservers = new CopyOnWriteArrayList<>(); // use COWAL in order to avoid problems with observer removal while sending notifications
-	private static boolean myObserversAreBeingNotified = false; // in order to avoid notification cycles
-
+public class Line extends AbstractFigure {
 	private static final int INTER_SIZE = 4;
-
 	private Point originPoint = null;
 	private Point endPoint = null;
-
 
 	public Line(int x, int y, int w, int h) {
 		originPoint = new Point(x, y);
@@ -31,7 +19,7 @@ public class Line implements Figure {
 	public void draw(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.drawLine(originPoint.x, originPoint.y, endPoint.x, endPoint.y);
-		myObservers.forEach(figureListener -> figureListener.figureChanged(new FigureEvent(this)));
+		propagateFigureEvent(new FigureEvent(this));
 	}
 
 	@Override
@@ -40,7 +28,7 @@ public class Line implements Figure {
 		originPoint = origin;
 		endPoint = corner;
 		if(!original.equals(this)){
-			// TODO: maybe figure changed event?
+			propagateFigureEvent(new FigureEvent(this));
 		}
 	}
 
@@ -55,7 +43,7 @@ public class Line implements Figure {
 			endPoint = newEndPoint;
 			if(!myObserversAreBeingNotified){
 				myObserversAreBeingNotified = true;
-				myObservers.forEach(figureListener -> figureListener.figureChanged(new FigureEvent(this)));
+				propagateFigureEvent(new FigureEvent(this));
 			}
 			myObserversAreBeingNotified = false;
 		}
@@ -110,31 +98,6 @@ public class Line implements Figure {
 			return new Rectangle(originPoint.x, originPoint.y, width, height);
 		}
 
-		return null;
-	}
-
-	@Override
-	public List<FigureHandle> getHandles() {
-		return null;
-	}
-
-	@Override
-	public void addFigureListener(FigureListener listener) {
-		if(listener == null){return;}
-		if(!myObservers.contains(listener)){
-			myObservers.add(listener);
-		}
-	}
-
-	@Override
-	public void removeFigureListener(FigureListener listener) {
-		if(listener != null){
-			myObservers.remove(listener);
-		}
-	}
-
-	@Override
-	public Figure clone() {
 		return null;
 	}
 }
