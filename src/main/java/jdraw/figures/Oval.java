@@ -15,43 +15,22 @@ import java.awt.geom.Ellipse2D;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Represents rectangles in JDraw.
- * 
- * @author Sebastian Zimmermann
- *
- */
 public class Oval implements Figure {
 	private List<FigureListener> myObservers = new CopyOnWriteArrayList<>(); // use COWAL in order to avoid problems with observer removal while sending notifications
 	private static boolean myObserversAreBeingNotified = false; // in order to avoid notification cycles
 
-	/**
-	 * Use the java.awt.Rectangle in order to save/reuse code.
-	 */
-	//private Ellipse2D ellipse2D;
 	private Rectangle rectangle;
 
-	/**
-	 * Create a new rectangle of the given dimension.
-	 * @param x the x-coordinate of the upper left corner of the rectangle
-	 * @param y the y-coordinate of the upper left corner of the rectangle
-	 * @param w the rectangle's width
-	 * @param h the rectangle's height
-	 */
 	public Oval(int x, int y, int w, int h) {
 		rectangle = new Rectangle(x, y, w, h);
 	}
 
-	/**
-	 * Draw the rectangle to the given graphics context.
-	 * @param g the graphics context to use for drawing.
-	 */
 	@Override
 	public void draw(Graphics g) {
 		g.setColor(Color.WHITE);
-		g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+		g.fillOval(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 		g.setColor(Color.BLACK);
-		g.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+		g.drawOval(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 		myObservers.forEach(figureListener -> figureListener.figureChanged(new FigureEvent(this)));
 	}
 
@@ -76,7 +55,9 @@ public class Oval implements Figure {
 
 	@Override
 	public boolean contains(int x, int y) {
-		return rectangle.contains(x, y);
+		Rectangle tmpRect = rectangle;
+		Ellipse2D tmpOval = new Ellipse2D.Double(tmpRect.x, tmpRect.y, tmpRect.width, tmpRect.height);
+		return tmpOval.contains(x, y);
 	}
 
 	@Override
@@ -84,11 +65,6 @@ public class Oval implements Figure {
 		return rectangle.getBounds();
 	}
 
-	/**
-	 * Returns a list of 8 handles for this Rectangle.
-	 * @return all handles that are attached to the targeted figure.
-	 * @see Figure#getHandles()
-	 */	
 	@Override
 	public List<FigureHandle> getHandles() {
 		return null;

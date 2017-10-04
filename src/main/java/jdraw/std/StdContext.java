@@ -169,8 +169,8 @@ public class StdContext extends AbstractContext {
 		addTool(rectangleTool);
 		DrawTool lineTool = new LineTool(this);
 		addTool(lineTool);
-		//DrawTool ovalTool = new OvalTool(this);
-		//addTool(ovalTool);
+		DrawTool ovalTool = new OvalTool(this);
+		addTool(ovalTool);
 	}
 
 	/**
