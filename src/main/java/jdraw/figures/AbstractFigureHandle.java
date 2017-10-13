@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 
 public abstract class AbstractFigureHandle implements FigureHandle {
     protected Figure owner;
+    protected Point anchorPoint;
 
     public AbstractFigureHandle(Figure owner){
         this.owner = owner;
@@ -37,17 +38,7 @@ public abstract class AbstractFigureHandle implements FigureHandle {
     }
 
     @Override
-    public void startInteraction(int x, int y, MouseEvent e, DrawView v) {
-
-    }
-
-    @Override
-    public void dragInteraction(int x, int y, MouseEvent e, DrawView v) {
-
-    }
-
-    @Override
     public void stopInteraction(int x, int y, MouseEvent e, DrawView v) {
-
+        anchorPoint = null;
     }
 }
