@@ -5,6 +5,7 @@ import jdraw.framework.FigureEvent;
 import jdraw.framework.FigureHandle;
 import jdraw.framework.FigureListener;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -13,8 +14,11 @@ public abstract class AbstractFigure implements Figure {
     protected static boolean myObserversAreBeingNotified = false; // in order to avoid notification cycles
 
     @Override
-    public List<FigureHandle> getHandles() {
-        return null;
+    public List<FigureHandle> getHandles(){
+        List<FigureHandle> handles = new LinkedList<>();
+        handles.add(new NorthWestHandle(this));
+        handles.add(new SouthEastHandle(this));
+        return handles;
     }
 
     @Override
