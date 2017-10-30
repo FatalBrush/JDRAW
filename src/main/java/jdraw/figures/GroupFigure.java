@@ -1,6 +1,7 @@
 package jdraw.figures;
 
 import jdraw.framework.Figure;
+import jdraw.framework.FigureGroup;
 import jdraw.framework.FigureHandle;
 import jdraw.framework.FigureListener;
 
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class GroupFigure implements Figure {
+public class GroupFigure implements Figure, FigureGroup {
     private List<Figure> parts = new ArrayList<>(); // TODO: maybe use COWAL
     private Rectangle bounds;
 
@@ -70,5 +71,10 @@ public class GroupFigure implements Figure {
     @Override
     public Figure clone() {
         return null;
+    }
+
+    @Override
+    public Iterable<Figure> getFigureParts() {
+        return parts;
     }
 }
