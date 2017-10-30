@@ -5,6 +5,7 @@
 package jdraw.std;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
+import jdraw.figures.GroupFigure;
 import jdraw.figures.LineTool;
 import jdraw.figures.OvalTool;
 import jdraw.figures.RectTool;
@@ -107,11 +109,35 @@ public class StdContext extends AbstractContext {
 		
 		editMenu.addSeparator();
 		JMenuItem group = new JMenuItem("Group");
-		group.setEnabled(false);
+		group.addActionListener(e -> {
+			List<Figure> figuresToRemoveFromModel = getView().getSelection();
+			getModel().addFigure(new GroupFigure(figuresToRemoveFromModel));
+			figuresToRemoveFromModel.forEach(figure -> {
+				getModel().removeFigure(figure);
+			});
+			getView().getSelection().clear();
+		});
 		editMenu.add(group);
 
 		JMenuItem ungroup = new JMenuItem("Ungroup");
-		ungroup.setEnabled(false);
+		ungroup.addActionListener(e -> {
+			List<Figure> figuresToUngroup = getView().getSelection();
+			Iterator<Figure> figuresToUngroupIT = figuresToUngroup.iterator();
+			while(figuresToUngroupIT.hasNext()){
+				Figure figure = figuresToUngroupIT.next();
+				if(figure instanceof GroupFigure){
+					Iterable<Figure> eachPartOfThisGroup = ((GroupFigure) figure).getFigureParts();
+					Iterator<Figure> it = eachPartOfThisGroup.iterator();
+					while(it.hasNext()){ // there might be more groups in here, ongrouping first layer though
+						Figure singleFigure = it.next();
+						getView().getModel().addFigure(singleFigure);
+					}
+					getModel().removeFigure(figure);
+					figuresToUngroupIT.remove();
+				}
+			}
+			getView().getSelection().clear();
+		});
 		editMenu.add(ungroup);
 
 		editMenu.addSeparator();
