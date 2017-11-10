@@ -104,4 +104,9 @@ public class Line extends AbstractFigure {
 
 		return null;
 	}
+
+	@Override
+	public Line clone(){
+		return (Line) super.clone();
+	}
 }

@@ -5,6 +5,7 @@
 package jdraw.std;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +36,7 @@ import jdraw.grid.SimpleGrid;
  * @version 2.6, 24.09.09
  */
 public class StdContext extends AbstractContext {
+	private final List<Figure> figuresToPaste = new ArrayList<>();
 
 	/**
 	 * Constructs a standard context with a default set of drawing tools.
@@ -96,9 +98,42 @@ public class StdContext extends AbstractContext {
 		);
 
 		editMenu.addSeparator();
-		editMenu.add("Cut").setEnabled(false);
-		editMenu.add("Copy").setEnabled(false);
-		editMenu.add("Paste").setEnabled(false);
+		JMenuItem cut = new JMenuItem("Cut");
+		cut.addActionListener(e -> {
+			figuresToPaste.clear();
+			for(Figure f : getView().getSelection()){
+				getModel().removeFigure(f);
+				figuresToPaste.add(f);
+			}
+			showStatusText("cut");
+
+		});
+		editMenu.add(cut);
+		JMenuItem copy = new JMenuItem("Copy");
+		copy.addActionListener(e -> {
+			figuresToPaste.clear();
+			for(Figure f : getView().getSelection()){
+				figuresToPaste.add(f);
+			}
+			showStatusText("copied");
+		});
+		editMenu.add(copy);
+		JMenuItem paste = new JMenuItem("Paste");
+		paste.addActionListener(e -> {
+			if(figuresToPaste.isEmpty()){
+				showStatusText("copy or cut first");
+			} else {
+				Figure tmp = null;
+				for(Figure f : figuresToPaste){
+					tmp = f.clone();
+					tmp.move(10,10);
+					getModel().addFigure(tmp);
+				}
+				showStatusText("pasted");
+				figuresToPaste.clear();
+			}
+		});
+		editMenu.add(paste);
 
 		editMenu.addSeparator();
 		JMenuItem clear = new JMenuItem("Clear");

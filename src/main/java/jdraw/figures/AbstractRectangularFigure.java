@@ -51,4 +51,11 @@ public abstract class AbstractRectangularFigure extends AbstractFigure {
         handles.add(new NorthWestHandle(this));
         return handles;
     }
+
+    @Override
+    public AbstractRectangularFigure clone() {
+        AbstractRectangularFigure clone = (AbstractRectangularFigure) super.clone(); // copy the basis
+        clone.rectangle = (Rectangle) this.rectangle.clone(); // copy this class's attributes
+        return clone;
+    }
 }
