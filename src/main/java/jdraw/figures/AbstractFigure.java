@@ -37,8 +37,15 @@ public abstract class AbstractFigure implements Figure {
     }
 
     @Override
-    public Figure clone() {
-        return null;
+    public AbstractFigure clone() {
+        AbstractFigure clone = null;
+        try {
+            clone = (AbstractFigure) super.clone();
+            //myObservers.forEach(clone::addFigureListener); shallow copy of listeners
+        }  catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return clone;
     }
 
     protected void propagateFigureEvent(FigureEvent e){
